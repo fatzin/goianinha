@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "goianinha.tab.h"
+#include "parser/goianinha.tab.h"
 
 // Definição dos códigos para tokens
 #define T_ID 1

@@ -1,16 +1,25 @@
-all: main symtable lexer
+CC = g++
+CFLAGS = -std=c++17
 
-main:
-		g++ -std=c++17 -Wall -Wextra -o goianinha main.cpp
+all: goianinha
 
-symtable:
-		$(MAKE) -C symtable
+goianinha: lex.yy.c parser/goianinha.tab.c
+	$(CC) $(CFLAGS) -o goianinha lex.yy.c parser/goianinha.tab.c
 
-lexer:
-		$(MAKE) -C lexer
+lex.yy.c: goianinha.l
+	flex goianinha.l
+
+parser/goianinha.tab.c: parser/goianinha.y
+	bison -d -o parser/goianinha.tab.c parser/goianinha.y
 
 clean:
-		rm -f goianinha
-		$(MAKE) -C symtable clean
-		$(MAKE) -C lexer clean
+	rm -f goianinha lex.yy.c parser/goianinha.tab.c parser/goianinha.tab.h
+
+test:
+	@for file in test_program/*.gyn; do \
+		echo "\n--------------file: $$file------------------"; \
+		echo "Testando $$file:"; \
+		echo "-------------stdout--------------"; \
+		./goianinha $$file || true; \
+	done
 

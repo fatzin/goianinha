@@ -1,0 +1,15 @@
+int x, y;
+car c;
+
+int soma(int a, int b) {
+    retorne a + b;
+}
+
+programa {
+    int resultado;
+    leia x;
+    leia y;
+    resultado = soma(x, y);
+    escreva resultado;
+    novalinha;
+} 
