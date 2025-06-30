@@ -1,0 +1,87 @@
+int x, y, z, resultado;
+
+int confusao_escopo(int x, int y, int z) {
+    int temp;
+    
+    escreva "Dentro da funcao - parametros originais:";
+    novalinha;
+    escreva "x=";
+    escreva x;
+    escreva " y=";
+    escreva y;
+    escreva " z=";
+    escreva z;
+    novalinha;
+    
+    x = x + 100;
+    y = y * 10;
+    z = z - 50;
+    
+    escreva "Dentro da funcao - parametros modificados:";
+    novalinha;
+    escreva "x=";
+    escreva x;
+    escreva " y=";
+    escreva y;
+    escreva " z=";
+    escreva z;
+    novalinha;
+    
+    temp = x + y + z;
+    retorne temp;
+}
+
+int usa_globais() {
+    escreva "Funcao usa_globais - valores globais:";
+    novalinha;
+    escreva "x=";
+    escreva x;
+    escreva " y=";
+    escreva y;
+    escreva " z=";
+    escreva z;
+    novalinha;
+    
+    retorne x * y + z;
+}
+
+programa {
+    x = 5;
+    y = 3;
+    z = 8;
+    
+    escreva "=== Teste de Conflitos de Escopo ===";
+    novalinha;
+    escreva "Variaveis globais iniciais:";
+    novalinha;
+    escreva "x=";
+    escreva x;
+    escreva " y=";
+    escreva y;
+    escreva " z=";
+    escreva z;
+    novalinha;
+    novalinha;
+    
+    resultado = confusao_escopo(x, y, z);
+    
+    novalinha;
+    escreva "Apos chamada da funcao - globais nao mudaram:";
+    novalinha;
+    escreva "x=";
+    escreva x;
+    escreva " y=";
+    escreva y;
+    escreva " z=";
+    escreva z;
+    novalinha;
+    escreva "Resultado da funcao: ";
+    escreva resultado;
+    novalinha;
+    novalinha;
+    
+    resultado = usa_globais();
+    escreva "Resultado usando globais: ";
+    escreva resultado;
+    novalinha;
+} 

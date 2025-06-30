@@ -1,0 +1,59 @@
+int num1, num2, maior, menor;
+
+int encontra_maior(int a, int b, int c) {
+    a = a + 1;
+    
+    se (a >= b) entao {
+        se (a >= c) entao {
+            retorne a;
+        } senao {
+            retorne c;
+        }
+    } senao {
+        se (b >= c) entao {
+            retorne b;
+        } senao {
+            retorne c;
+        }
+    }
+}
+
+programa {
+    escreva "=== TESTE FUNCIONAL COMPLETO ===";
+    novalinha;
+    escreva "Este programa testa:";
+    novalinha;
+    escreva "- 3 parametros";
+    novalinha;
+    escreva "- Modificacao de parametros";
+    novalinha;
+    escreva "- Estruturas de controle aninhadas";
+    novalinha;
+    escreva "- Operadores relacionais";
+    novalinha;
+    novalinha;
+    
+    escreva "Digite o primeiro numero: ";
+    leia num1;
+    escreva "Digite o segundo numero: ";
+    leia num2;
+    
+    escreva "Testando com valores: ";
+    escreva num1;
+    escreva ", ";
+    escreva num2;
+    escreva ", 100";
+    novalinha;
+    
+    maior = encontra_maior(num1, num2, 100);
+    
+    escreva "O maior numero eh: ";
+    escreva maior;
+    novalinha;
+    
+    escreva "Observe que o primeiro parametro foi incrementado!";
+    novalinha;
+    
+    escreva "Teste concluido com sucesso!";
+    novalinha;
+} 

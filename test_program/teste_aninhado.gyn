@@ -1,0 +1,59 @@
+int i, j, contador, limite, soma;
+
+int eh_primo(int num) {
+    int divisor;
+    
+    se (num <= 1) entao {
+        retorne 0;
+    }
+    
+    se (num == 2) entao {
+        retorne 1;
+    }
+    
+    divisor = 2;
+    enquanto (divisor < num) execute {
+        se ((num / divisor) * divisor == num) entao {
+            retorne 0;
+        }
+        divisor = divisor + 1;
+    }
+    
+    retorne 1;
+}
+
+programa {
+    escreva "Teste de estruturas aninhadas";
+    novalinha;
+    escreva "Digite um limite: ";
+    leia limite;
+    
+    contador = 0;
+    soma = 0;
+    i = 2;
+    
+    enquanto (i <= limite) execute {
+        se (eh_primo(i)) entao {
+            escreva "Primo encontrado: ";
+            escreva i;
+            novalinha;
+            contador = contador + 1;
+            soma = soma + i;
+            
+            se (contador == 5) entao {
+                escreva "Primeiros 5 primos encontrados!";
+                novalinha;
+            }
+        }
+        i = i + 1;
+    }
+    
+    escreva "Total de primos ate ";
+    escreva limite;
+    escreva ": ";
+    escreva contador;
+    novalinha;
+    escreva "Soma dos primos: ";
+    escreva soma;
+    novalinha;
+} 

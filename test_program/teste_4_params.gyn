@@ -1,0 +1,35 @@
+int a, b, c, d, resultado;
+
+int operacao_complexa(int x, int y, int z, int w) {
+    x = x * 2;
+    y = y + 5;
+    z = z - 3;
+    w = w / 2;
+    retorne (x + y) * (z - w);
+}
+
+programa {
+    escreva "Teste com 4 parametros";
+    novalinha;
+    
+    a = 10;
+    b = 8;
+    c = 15;
+    d = 6;
+    
+    escreva "Valores: a=";
+    escreva a;
+    escreva " b=";
+    escreva b;
+    escreva " c=";
+    escreva c;
+    escreva " d=";
+    escreva d;
+    novalinha;
+    
+    resultado = operacao_complexa(a, b, c, d);
+    
+    escreva "Resultado da operacao complexa: ";
+    escreva resultado;
+    novalinha;
+} 

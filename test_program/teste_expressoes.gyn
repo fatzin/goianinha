@@ -1,0 +1,97 @@
+int a, b, c, d, resultado;
+car caractere;
+
+int calcula_expressao(int x, int y) {
+    retorne ((x + y) * (x - y)) + ((x * y) / (x + 1));
+}
+
+int teste_relacionais(int a, int b, int c) {
+    int pontos;
+    pontos = 0;
+    
+    se (a > b) entao {
+        pontos = pontos + 1;
+    }
+    
+    se (b <= c) entao {
+        pontos = pontos + 2;
+    }
+    
+    se (a == c) entao {
+        pontos = pontos + 4;
+    }
+    
+    se (a != b) entao {
+        pontos = pontos + 8;
+    }
+    
+    se (a >= b) entao {
+        pontos = pontos + 16;
+    }
+    
+    se (b < c) entao {
+        pontos = pontos + 32;
+    }
+    
+    retorne pontos;
+}
+
+programa {
+    escreva "=== Teste de Expressoes Complexas ===";
+    novalinha;
+    
+    a = 15;
+    b = 8;
+    c = 12;
+    d = 3;
+    
+    escreva "Valores: a=";
+    escreva a;
+    escreva " b=";
+    escreva b;
+    escreva " c=";
+    escreva c;
+    escreva " d=";
+    escreva d;
+    novalinha;
+    novalinha;
+    
+    escreva "=== Expressoes Aritmeticas ===";
+    novalinha;
+    
+    resultado = a + b * c - d;
+    escreva "a + b * c - d = ";
+    escreva resultado;
+    novalinha;
+    
+    resultado = (a + b) * (c - d);
+    escreva "(a + b) * (c - d) = ";
+    escreva resultado;
+    novalinha;
+    
+    resultado = a * b / c + d;
+    escreva "a * b / c + d = ";
+    escreva resultado;
+    novalinha;
+    
+    resultado = calcula_expressao(a, b);
+    escreva "Expressao complexa com a e b = ";
+    escreva resultado;
+    novalinha;
+    novalinha;
+    
+    escreva "=== Operadores Relacionais ===";
+    novalinha;
+    
+    resultado = teste_relacionais(a, b, c);
+    escreva "Pontuacao dos testes relacionais: ";
+    escreva resultado;
+    novalinha;
+    
+    escreva "=== Teste com Caracteres ===";
+    novalinha;
+    caractere = 'A';
+    escreva "Caractere definido: ";
+    escreva caractere;
+    novalinha;
+} 

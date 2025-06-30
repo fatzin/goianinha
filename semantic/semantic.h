@@ -36,4 +36,8 @@ void analyze_commands(semantic_analyzer *analyzer, ast_node *node);
 void analyze_expression(semantic_analyzer *analyzer, ast_node *node);
 data_type analyze_function_call(semantic_analyzer *analyzer, ast_node *node);
 
+/* Funções auxiliares para análise de chamadas de função */
+int count_arguments(ast_node *args);
+void check_argument_types(semantic_analyzer *analyzer, ast_node *args, symbol_entry *func, int line_number, int arg_index);
+
 #endif

@@ -1,0 +1,22 @@
+int n, resultado;
+
+int fibonacci(int n) {
+    se (n <= 1) entao {
+        retorne n;
+    } senao {
+        retorne fibonacci(n - 1) + fibonacci(n - 2);
+    }
+}
+
+programa {
+    escreva "Calculo de Fibonacci";
+    novalinha;
+    escreva "Digite um numero: ";
+    leia n;
+    resultado = fibonacci(n);
+    escreva "Fibonacci de ";
+    escreva n;
+    escreva " = ";
+    escreva resultado;
+    novalinha;
+} 

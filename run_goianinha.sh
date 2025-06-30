@@ -21,9 +21,6 @@ if [ $? -eq 0 ]; then
     echo "=== Executando código MIPS com SPIM ==="
     echo "Arquivo gerado: $MIPS_FILE"
     echo ""
-    
-    # Executa o programa com SPIM
-    echo "run" | spim -file "$MIPS_FILE"
 else
     echo "Erro na compilação!"
     exit 1

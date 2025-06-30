@@ -1,15 +1,16 @@
 int x, y;
 car c;
 
-int soma(int a, int b) {
-    retorne a + b;
+int soma(int a, int b, int c) {
+    c = 10;
+    retorne a + b + c;
 }
 
 programa {
     int resultado;
     leia x;
     leia y;
-    resultado = soma(x, y);
+    resultado = soma(x, y, 5);
     escreva resultado;
     novalinha;
 } 

@@ -131,6 +131,13 @@ void analyze_variable_declaration(semantic_analyzer *analyzer, ast_node *node)
             semantic_error(node->child2->line_number, "Variável já foi declarada neste escopo");
             analyzer->has_errors = 1;
         }
+
+        /* Se estiver numa função, também insere na tabela global para o gerador de código */
+        if (analyzer->in_function && analyzer->current_table != analyzer->global_table)
+        {
+            insert_symbol(analyzer->global_table, node->child2->lexeme,
+                          SYMBOL_VAR, var_type, node->child2->line_number);
+        }
     }
     else if (node->lexeme)
     {
@@ -141,6 +148,13 @@ void analyze_variable_declaration(semantic_analyzer *analyzer, ast_node *node)
         {
             semantic_error(node->line_number, "Variável já foi declarada neste escopo");
             analyzer->has_errors = 1;
+        }
+
+        /* Se estiver numa função, também insere na tabela global para o gerador de código */
+        if (analyzer->in_function && analyzer->current_table != analyzer->global_table)
+        {
+            insert_symbol(analyzer->global_table, node->lexeme,
+                          SYMBOL_VAR, var_type, node->line_number);
         }
     }
 
@@ -159,6 +173,13 @@ void analyze_variable_declaration(semantic_analyzer *analyzer, ast_node *node)
                 {
                     semantic_error(var_id->line_number, "Variável já foi declarada neste escopo");
                     analyzer->has_errors = 1;
+                }
+
+                /* Se estiver numa função, também insere na tabela global para o gerador de código */
+                if (analyzer->in_function && analyzer->current_table != analyzer->global_table)
+                {
+                    insert_symbol(analyzer->global_table, var_id->lexeme,
+                                  SYMBOL_VAR, var_type, var_id->line_number);
                 }
             }
             var_list = var_list->child2;
@@ -558,22 +579,7 @@ data_type analyze_function_call(semantic_analyzer *analyzer, ast_node *call)
     }
 
     /* Verifica parâmetros */
-    int param_count = 0;
-    ast_node *args = call->child2;
-
-    /* Conta argumentos */
-    while (args)
-    {
-        param_count++;
-        if (args->type == AST_LISTA_EXPR && args->child2)
-        {
-            args = args->child2;
-        }
-        else
-        {
-            break;
-        }
-    }
+    int param_count = count_arguments(call->child2);
 
     if (param_count != func->num_params)
     {
@@ -583,29 +589,7 @@ data_type analyze_function_call(semantic_analyzer *analyzer, ast_node *call)
     }
 
     /* Verifica tipos dos argumentos */
-    args = call->child2;
-    int arg_index = 0;
-    while (args && arg_index < func->num_params)
-    {
-        ast_node *arg_expr = (args->type == AST_LISTA_EXPR) ? args->child1 : args;
-        data_type arg_type = get_expression_type(analyzer, arg_expr);
-
-        if (!types_compatible(arg_type, func->param_types[arg_index]))
-        {
-            semantic_error(call->line_number, "Tipo de argumento incompatível com parâmetro da função");
-            analyzer->has_errors = 1;
-        }
-
-        arg_index++;
-        if (args->type == AST_LISTA_EXPR && args->child2)
-        {
-            args = args->child2;
-        }
-        else
-        {
-            break;
-        }
-    }
+    check_argument_types(analyzer, call->child2, func, call->line_number, 0);
 
     return func->dtype;
 }
@@ -616,4 +600,94 @@ void analyze_expression(semantic_analyzer *analyzer, ast_node *node)
     if (!node)
         return;
     get_expression_type(analyzer, node);
+}
+
+/* Conta recursivamente o número de argumentos em uma lista de expressões */
+int count_arguments(ast_node *args)
+{
+    if (!args)
+        return 0;
+
+    if (args->type == AST_LISTA_EXPR)
+    {
+        /* Conta argumentos recursivamente */
+        int count = 0;
+        if (args->child1)
+        {
+
+            if (args->child1->type == AST_LISTA_EXPR)
+            {
+                /* Se child1 é uma lista, conta recursivamente */
+                count += count_arguments(args->child1);
+            }
+            else
+            {
+                /* Se child1 é um argumento, conta como 1 */
+                count = 1;
+            }
+        }
+        if (args->child2)
+        {
+
+            count += count_arguments(args->child2); /* Argumentos restantes */
+        }
+
+        return count;
+    }
+    else
+    {
+        /* Argumento único */
+
+        return 1;
+    }
+}
+
+/* Verifica recursivamente os tipos dos argumentos */
+void check_argument_types(semantic_analyzer *analyzer, ast_node *args, symbol_entry *func, int line_number, int arg_index)
+{
+    if (!args || arg_index >= func->num_params)
+        return;
+
+    if (args->type == AST_LISTA_EXPR)
+    {
+        /* Verifica argumentos recursivamente */
+        if (args->child1)
+        {
+            if (args->child1->type == AST_LISTA_EXPR)
+            {
+                /* Se child1 é uma lista, verifica recursivamente */
+                check_argument_types(analyzer, args->child1, func, line_number, arg_index);
+                /* Calcula quantos argumentos foram processados em child1 */
+                int child1_count = count_arguments(args->child1);
+                arg_index += child1_count;
+            }
+            else
+            {
+                /* Se child1 é um argumento simples, verifica tipo */
+                data_type arg_type = get_expression_type(analyzer, args->child1);
+                if (!types_compatible(arg_type, func->param_types[arg_index]))
+                {
+                    semantic_error(line_number, "Tipo de argumento incompatível com parâmetro da função");
+                    analyzer->has_errors = 1;
+                }
+                arg_index++;
+            }
+        }
+
+        /* Verifica argumentos restantes */
+        if (args->child2)
+        {
+            check_argument_types(analyzer, args->child2, func, line_number, arg_index);
+        }
+    }
+    else
+    {
+        /* Argumento único */
+        data_type arg_type = get_expression_type(analyzer, args);
+        if (!types_compatible(arg_type, func->param_types[arg_index]))
+        {
+            semantic_error(line_number, "Tipo de argumento incompatível com parâmetro da função");
+            analyzer->has_errors = 1;
+        }
+    }
 }

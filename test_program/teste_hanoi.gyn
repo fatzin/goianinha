@@ -1,0 +1,131 @@
+int movimento_contador, discos;
+
+int hanoi(int n, int origem, int destino, int auxiliar) {
+    se (n == 1) entao {
+        movimento_contador = movimento_contador + 1;
+        escreva "Movimento ";
+        escreva movimento_contador;
+        escreva ": Disco ";
+        escreva n;
+        escreva " de ";
+        escreva origem;
+        escreva " para ";
+        escreva destino;
+        novalinha;
+        retorne 1;
+    } senao {
+        hanoi(n - 1, origem, auxiliar, destino);
+        
+        movimento_contador = movimento_contador + 1;
+        escreva "Movimento ";
+        escreva movimento_contador;
+        escreva ": Disco ";
+        escreva n;
+        escreva " de ";
+        escreva origem;
+        escreva " para ";
+        escreva destino;
+        novalinha;
+        
+        hanoi(n - 1, auxiliar, destino, origem);
+        
+        retorne movimento_contador;
+    }
+}
+
+int potencia(int base, int expoente) {
+    int resultado;
+    int i;
+    
+    se (expoente == 0) entao {
+        retorne 1;
+    }
+    
+    resultado = 1;
+    i = 1;
+    
+    enquanto (i <= expoente) execute {
+        resultado = resultado * base;
+        i = i + 1;
+    }
+    
+    retorne resultado;
+}
+
+int valida_entrada(int n) {
+    se (n <= 0) entao {
+        escreva "ERRO: Numero de discos deve ser positivo!";
+        novalinha;
+        retorne 0;
+    }
+    
+    se (n > 5) entao {
+        escreva "AVISO: Muitos discos! Sera demorado...";
+        novalinha;
+    }
+    
+    retorne 1;
+}
+
+programa {
+    int movimentos_teoricos;
+    int movimentos_executados;
+    
+    escreva "=== TORRE DE HANOI - TESTE EXTREMO ===";
+    novalinha;
+    escreva "Este teste combina:";
+    novalinha;
+    escreva "- Recursao multipla";
+    novalinha;
+    escreva "- 4 parametros por funcao";
+    novalinha;
+    escreva "- Estruturas de controle aninhadas";
+    novalinha;
+    escreva "- Operacoes matematicas complexas";
+    novalinha;
+    novalinha;
+    
+    escreva "Digite o numero de discos (1-5): ";
+    leia discos;
+    
+    se (valida_entrada(discos) == 0) entao {
+        escreva "Programa terminado devido a entrada invalida.";
+        novalinha;
+    } senao {
+        movimento_contador = 0;
+        
+        escreva "Resolvendo Torre de Hanoi com ";
+        escreva discos;
+        escreva " discos...";
+        novalinha;
+        escreva "Origem=1, Destino=3, Auxiliar=2";
+        novalinha;
+        novalinha;
+        
+        movimentos_executados = hanoi(discos, 1, 3, 2);
+        
+        novalinha;
+        escreva "=== RESULTADO ===";
+        novalinha;
+        
+        movimentos_teoricos = potencia(2, discos) - 1;
+        
+        escreva "Movimentos teoricos (2^n - 1): ";
+        escreva movimentos_teoricos;
+        novalinha;
+        escreva "Movimentos executados: ";
+        escreva movimentos_executados;
+        novalinha;
+        
+        se (movimentos_teoricos == movimentos_executados) entao {
+            escreva "SUCESSO: Resultado correto!";
+            novalinha;
+        } senao {
+            escreva "ERRO: Resultado incorreto!";
+            novalinha;
+        }
+        
+        escreva "Teste de recursao complexa completado!";
+        novalinha;
+    }
+} 
