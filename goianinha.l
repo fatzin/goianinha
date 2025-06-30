@@ -2,7 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* Forward declaration */
+typedef struct ast_node ast_node;
+
 #include "parser/goianinha.tab.h"
+
+extern YYSTYPE yylval;
 
 // Definição dos códigos para tokens
 #define T_ID 1
@@ -47,6 +53,8 @@
 #define T_PONTOVIR 47
 
 int comment_start_line = 0;  // Para rastrear onde um comentário começa
+char string_buf[1000];       // Buffer para armazenar strings
+char *string_buf_ptr;        // Ponteiro para o buffer
 %}
 
 %option noyywrap
@@ -70,51 +78,56 @@ ESPACO      [ \t\r\n]+
 %%
 
  /* Palavras reservadas */
-"int"         { return INT; }
-"car"         { return CAR; }
-"programa"    { return PROGRAMA; }
-"retorne"     { return RETORNE; }
-"leia"        { return LEIA; }
-"escreva"     { return ESCREVA; }
-"novalinha"   { return NOVALINHA; }
-"se"          { return SE; }
-"entao"       { return ENTAO; }
-"senao"       { return SENAO; }
-"enquanto"    { return ENQUANTO; }
-"execute"     { return EXECUTE; }
-"ou"          { return OU; }
-"e"           { return E; }
+"int"         { yylval.str = strdup(yytext); return INT; }
+"car"         { yylval.str = strdup(yytext); return CAR; }
+"programa"    { yylval.str = strdup(yytext); return PROGRAMA; }
+"retorne"     { yylval.str = strdup(yytext); return RETORNE; }
+"leia"        { yylval.str = strdup(yytext); return LEIA; }
+"escreva"     { yylval.str = strdup(yytext); return ESCREVA; }
+"novalinha"   { yylval.str = strdup(yytext); return NOVALINHA; }
+"se"          { yylval.str = strdup(yytext); return SE; }
+"entao"       { yylval.str = strdup(yytext); return ENTAO; }
+"senao"       { yylval.str = strdup(yytext); return SENAO; }
+"enquanto"    { yylval.str = strdup(yytext); return ENQUANTO; }
+"execute"     { yylval.str = strdup(yytext); return EXECUTE; }
+"ou"          { yylval.str = strdup(yytext); return OU; }
+"e"           { yylval.str = strdup(yytext); return E; }
 
  /* Operadores e símbolos */
-"="           { return ASSIGN; }
-"+"           { return PLUS; }
-"-"           { return MINUS; }
-"*"           { return MULT; }
-"/"           { return DIV; }
-"!"           { return NOT; }
-">"           { return GT; }
-"<"           { return LT; }
-">="          { return GE; }
-"<="          { return LE; }
-"=="          { return EQ; }
-"!="          { return NE; }
-"("           { return LPAREN; }
-")"           { return RPAREN; }
-"{"           { return LBRACE; }
-"}"           { return RBRACE; }
-","           { return COMMA; }
-";"           { return SEMICOLON; }
+"="           { yylval.str = strdup(yytext); return ASSIGN; }
+"+"           { yylval.str = strdup(yytext); return PLUS; }
+"-"           { yylval.str = strdup(yytext); return MINUS; }
+"*"           { yylval.str = strdup(yytext); return MULT; }
+"/"           { yylval.str = strdup(yytext); return DIV; }
+"!"           { yylval.str = strdup(yytext); return NOT; }
+">"           { yylval.str = strdup(yytext); return GT; }
+"<"           { yylval.str = strdup(yytext); return LT; }
+">="          { yylval.str = strdup(yytext); return GE; }
+"<="          { yylval.str = strdup(yytext); return LE; }
+"=="          { yylval.str = strdup(yytext); return EQ; }
+"!="          { yylval.str = strdup(yytext); return NE; }
+"("           { yylval.str = strdup(yytext); return LPAREN; }
+")"           { yylval.str = strdup(yytext); return RPAREN; }
+"{"           { yylval.str = strdup(yytext); return LBRACE; }
+"}"           { yylval.str = strdup(yytext); return RBRACE; }
+","           { yylval.str = strdup(yytext); return COMMA; }
+";"           { yylval.str = strdup(yytext); return SEMICOLON; }
 
  /* Identificadores e constantes */
-{ID}          { return ID; }
-{INTCONST}    { return INTCONST; }
-{CARCONST}    { return CARCONST; }
+{ID}          { yylval.str = strdup(yytext); return ID; }
+{INTCONST}    { yylval.str = strdup(yytext); return INTCONST; }
+{CARCONST}    { yylval.str = strdup(yytext); return CARCONST; }
 
  /* Cadeias de caracteres */
-\"            { BEGIN(CADEIA); }
+\"            { string_buf_ptr = string_buf; BEGIN(CADEIA); }
 <CADEIA>\n    { fprintf(stderr, "ERRO: Quebra de linha não permitida dentro de string na linha %d\n", yylineno-1); BEGIN(INITIAL); }
-<CADEIA>\"    { BEGIN(INITIAL); return STRING; }
-<CADEIA>.     {  }
+<CADEIA>\"    { 
+                *string_buf_ptr = '\0'; 
+                yylval.str = strdup(string_buf); 
+                BEGIN(INITIAL); 
+                return STRING; 
+              }
+<CADEIA>.     { *string_buf_ptr++ = *yytext; }
 <CADEIA><<EOF>> { fprintf(stderr, "ERRO: Cadeia de caracteres não fechada na linha %d\n", yylineno); BEGIN(INITIAL); }
 
  /* Comentários */

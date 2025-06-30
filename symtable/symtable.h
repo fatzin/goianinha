@@ -1,166 +1,76 @@
 #ifndef SYMTABLE_H
 #define SYMTABLE_H
 
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <memory>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-// Enumeração para os tipos de dados suportados
-enum class DataType {
-    INT,
-    CHAR,
-    VOID
-};
+/* Tipos de dados */
+typedef enum
+{
+    TYPE_INT = 0,
+    TYPE_CAR = 1,
+    TYPE_VOID = 2
+} data_type;
 
-// Enumeração para os tipos de símbolos
-enum class SymbolType {
-    VARIABLE,
-    FUNCTION,
-    PARAMETER
-};
+/* Tipos de símbolos */
+typedef enum
+{
+    SYMBOL_VAR,
+    SYMBOL_FUNC,
+    SYMBOL_PARAM
+} symbol_type;
 
-// Declaração antecipada para referência circular
-class FunctionSymbol;
+/* Escopo */
+typedef enum
+{
+    SCOPE_GLOBAL,
+    SCOPE_LOCAL
+} scope_type;
 
-// Classe base para todos os símbolos
-class Symbol {
-protected:
-    std::string name;
-    DataType dataType;
-    SymbolType symbolType;
-    int lineNumber;
+/* Entrada da tabela de símbolos */
+typedef struct symbol_entry
+{
+    char *name;           /* Nome do símbolo */
+    symbol_type sym_type; /* Tipo do símbolo (var, func, param) */
+    data_type dtype;      /* Tipo de dados (int, car, void) */
+    scope_type scope;     /* Escopo (global, local) */
+    int line_declared;    /* Linha onde foi declarado */
+    int line_used;        /* Linha onde foi usado */
 
-public:
-    Symbol(const std::string& name, DataType dataType, SymbolType symbolType, int lineNumber)
-        : name(name), dataType(dataType), symbolType(symbolType), lineNumber(lineNumber) {}
-    
-    virtual ~Symbol() = default;
-    
-    std::string getName() const { return name; }
-    DataType getDataType() const { return dataType; }
-    SymbolType getSymbolType() const { return symbolType; }
-    int getLineNumber() const { return lineNumber; }
-    
-    virtual std::string toString() const = 0;
-};
+    /* Para funções */
+    int num_params;         /* Número de parâmetros */
+    data_type *param_types; /* Tipos dos parâmetros */
+    char **param_names;     /* Nomes dos parâmetros */
 
-// Símbolo para variáveis
-class VariableSymbol : public Symbol {
-private:
-    int position; // Posição na declaração
+    /* Para variáveis */
+    int is_initialized; /* Se a variável foi inicializada */
 
-public:
-    VariableSymbol(const std::string& name, DataType dataType, int lineNumber, int position)
-        : Symbol(name, dataType, SymbolType::VARIABLE, lineNumber), position(position) {}
-    
-    int getPosition() const { return position; }
-    
-    std::string toString() const override;
-};
+    struct symbol_entry *next; /* Próxima entrada (lista ligada) */
+} symbol_entry;
 
-// Símbolo para parâmetros de função
-class ParameterSymbol : public Symbol {
-private:
-    int position; // Posição na lista de parâmetros
-    FunctionSymbol* function; // Função à qual o parâmetro pertence
+/* Tabela de símbolos */
+typedef struct symbol_table
+{
+    symbol_entry *head;          /* Primeira entrada */
+    struct symbol_table *parent; /* Escopo pai */
+    int scope_level;             /* Nível do escopo */
+} symbol_table;
 
-public:
-    ParameterSymbol(const std::string& name, DataType dataType, int lineNumber, int position, FunctionSymbol* function)
-        : Symbol(name, dataType, SymbolType::PARAMETER, lineNumber), position(position), function(function) {}
-    
-    int getPosition() const { return position; }
-    FunctionSymbol* getFunction() const { return function; }
-    
-    std::string toString() const override;
-};
+/* Funções da tabela de símbolos */
+symbol_table *create_symbol_table(symbol_table *parent);
+void destroy_symbol_table(symbol_table *table);
 
-// Símbolo para funções
-class FunctionSymbol : public Symbol {
-private:
-    int paramCount;
-    std::vector<std::shared_ptr<ParameterSymbol>> parameters;
+symbol_entry *insert_symbol(symbol_table *table, const char *name, symbol_type sym_type,
+                            data_type dtype, int line);
+symbol_entry *lookup_symbol(symbol_table *table, const char *name);
+symbol_entry *lookup_symbol_local(symbol_table *table, const char *name);
 
-public:
-    FunctionSymbol(const std::string& name, DataType returnType, int lineNumber, int paramCount = 0)
-        : Symbol(name, returnType, SymbolType::FUNCTION, lineNumber), paramCount(paramCount) {}
-    
-    int getParamCount() const { return paramCount; }
-    
-    void addParameter(std::shared_ptr<ParameterSymbol> param) {
-        parameters.push_back(param);
-        paramCount = parameters.size();
-    }
-    
-    std::vector<std::shared_ptr<ParameterSymbol>> getParameters() const { return parameters; }
-    
-    std::string toString() const override;
-};
+void add_function_param(symbol_entry *func_entry, data_type param_type, const char *param_name);
+void print_symbol_table(symbol_table *table);
 
-// Classe para um escopo na tabela de símbolos
-class SymbolTable {
-private:
-    std::unordered_map<std::string, std::shared_ptr<Symbol>> symbols;
+/* Funções auxiliares */
+const char *data_type_to_string(data_type type);
+const char *symbol_type_to_string(symbol_type type);
 
-public:
-    SymbolTable() = default;
-
-    // Inserir um símbolo na tabela
-    bool insert(std::shared_ptr<Symbol> symbol);
-    
-    // Procurar um símbolo pelo nome
-    std::shared_ptr<Symbol> lookup(const std::string& name) const;
-    
-    // Verifica se um símbolo existe na tabela
-    bool contains(const std::string& name) const;
-    
-    // Retorna todos os símbolos na tabela
-    std::vector<std::shared_ptr<Symbol>> getAllSymbols() const;
-};
-
-// Classe para gerenciar a pilha de tabelas de símbolos
-class SymbolTableStack {
-private:
-    std::vector<std::shared_ptr<SymbolTable>> tables;
-
-public:
-    // Inicializar a pilha de tabelas de símbolos
-    SymbolTableStack();
-    
-    // Destruir a pilha de tabelas de símbolos
-    ~SymbolTableStack();
-    
-    // Criar e empilhar um novo escopo
-    void pushScope();
-    
-    // Remover o escopo atual
-    void popScope();
-    
-    // Pesquisar um nome na pilha (do topo à base)
-    std::shared_ptr<Symbol> lookup(const std::string& name) const;
-    
-    // Inserir um nome de variável no escopo atual
-    bool insertVariable(const std::string& name, DataType type, int lineNumber, int position);
-    
-    // Inserir um nome de função no escopo atual
-    std::shared_ptr<FunctionSymbol> insertFunction(const std::string& name, DataType returnType, int lineNumber, int paramCount = 0);
-    
-    // Inserir um nome de parâmetro no escopo atual
-    bool insertParameter(const std::string& name, DataType type, int lineNumber, int position, std::shared_ptr<FunctionSymbol> function);
-    
-    // Obtém o escopo atual
-    std::shared_ptr<SymbolTable> getCurrentScope() const;
-    
-    // Verificar se a pilha está vazia
-    bool isEmpty() const;
-    
-    // Obter o tamanho da pilha
-    size_t size() const;
-};
-
-// Funções auxiliares para conversão de tipos
-std::string dataTypeToString(DataType type);
-std::string symbolTypeToString(SymbolType type);
-DataType stringToDataType(const std::string& typeStr);
-
-#endif // SYMTABLE_H
+#endif

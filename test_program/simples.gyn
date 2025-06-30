@@ -1,0 +1,9 @@
+int x, y, resultado;
+
+programa {
+    leia x;
+    leia y;
+    resultado = x + y;
+    escreva resultado;
+    novalinha;
+} 

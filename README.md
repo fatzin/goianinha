@@ -1,104 +1,151 @@
-# Compilador da Linguagem Goianinha
+# Compilador Goianinha - Implementação Completa
 
-Este é um compilador didático para a linguagem Goianinha. O compilador implementa uma tabela de símbolos e um analisador léxico para a linguagem.
+Este projeto implementa um compilador completo para a linguagem Goianinha, desenvolvido como parte da disciplina de Compiladores.
+
+## Fases Implementadas
+
+### ✅ Fase 1: Análise Léxica
+
+- **Arquivo**: `goianinha.l` (Flex)
+- **Funcionalidades**:
+  - Reconhecimento de tokens (palavras-chave, identificadores, operadores, constantes)
+  - Tratamento de comentários e espaços em branco
+  - Detecção de erros léxicos
+  - Suporte para tipos `int` e `car`
+
+### ✅ Fase 2: Análise Sintática e AST
+
+- **Arquivos**: `parser/goianinha.y` (Bison), `parser/ast.h`, `parser/ast.c`
+- **Funcionalidades**:
+  - Parser completo para a gramática da linguagem Goianinha
+  - Construção da Árvore Sintática Abstrata (AST)
+  - Detecção de erros sintáticos
+  - Suporte para:
+    - Declarações de variáveis e funções
+    - Comandos (se, enquanto, leia, escreva)
+    - Expressões aritméticas e chamadas de função
+
+### ✅ Fase 3: Análise Semântica
+
+- **Arquivos**: `semantic/semantic.h`, `semantic/semantic.c`, `symtable/symtable.h`, `symtable/symtable.c`
+- **Funcionalidades**:
+  - Tabela de símbolos hierárquica para gerenciamento de escopos
+  - Verificações semânticas:
+    - Declaração antes do uso
+    - Compatibilidade de tipos
+    - Verificação de parâmetros em chamadas de função
+    - Comando `retorne` apenas em funções
+    - Tipos corretos em condicionais
+
+### ✅ Fase 4: Geração de Código MIPS
+
+- **Arquivos**: `codegen/codegen.h`, `codegen/codegen.c`
+- **Funcionalidades**:
+  - Geração de código assembly MIPS funcional
+  - Suporte para:
+    - Variáveis globais na seção `.data`
+    - Operações aritméticas básicas (+, -, \*, /)
+    - Comandos de entrada/saída (`leia`, `escreva`)
+    - Funções com prólogo/epílogo
+    - Estruturas de controle (if, while)
+    - Atribuições e chamadas de função
 
 ## Estrutura do Projeto
 
 ```
-Goianinha/
-├── main.cpp                 # Programa principal
-├── Makefile                 # Makefile principal
-├── lexer/                   # Analisador léxico
-│   ├── goianinha.l          # Definição Flex do analisador léxico
-│   ├── main.c               # Falso analisador sintático para teste
-│   └── Makefile             # Makefile do lexer
-├── symtable/                # Tabela de símbolos
-│   ├── symtable.h           # Definições da tabela de símbolos
-│   ├── symtable.cpp         # Implementação da tabela de símbolos
-│   ├── main.cpp             # Programa de teste da tabela
-│   └── Makefile             # Makefile da tabela de símbolos
-└── test_program/            # Arquivos de teste
-    ├── teste.gyn            # Programa de exemplo
-    ├── fatorialCorreto.gyn  # Cálculo de fatorial funcionando
-    └── [outros arquivos]    # Exemplos com erros para testar
+.
+├── goianinha.l           # Analisador léxico (Flex)
+├── parser/
+│   ├── goianinha.y       # Analisador sintático (Bison)
+│   ├── ast.h            # Definições da AST
+│   └── ast.c            # Implementação da AST
+├── symtable/
+│   ├── symtable.h       # Tabela de símbolos
+│   └── symtable.c       # Implementação da tabela
+├── semantic/
+│   ├── semantic.h       # Analisador semântico
+│   └── semantic.c       # Implementação da análise semântica
+├── codegen/
+│   ├── codegen.h        # Gerador de código MIPS
+│   └── codegen.c        # Implementação do gerador
+├── test_program/        # Programas de teste
+├── main.cpp             # Programa principal (não usado)
+├── Makefile            # Compilação do projeto
+└── README.md           # Este arquivo
 ```
 
-## Requisitos
+## Como Usar
 
-- Linux
-- GCC/G++ (com suporte a C++17)
-- Flex (para gerar o analisador léxico)
-- Make
-
-## Compilação
-
-Para compilar o projeto completo:
+### Compilação
 
 ```bash
-cd /caminho/para/Goianinha
-make
+make clean && make
 ```
 
-Este comando compilará:
-
-1. O programa principal (`goianinha`)
-2. O programa de teste da tabela de símbolos (`symtable/symtable_test`)
-3. O analisador léxico (`lexer/goianinha`)
-
-## Como Utilizar
-
-### Testando a Tabela de Símbolos
-
-A tabela de símbolos pode ser testada com o programa de teste incluído:
+### Execução
 
 ```bash
-./symtable/symtable_test
+./goianinha programa.gyn
 ```
 
-Este comando executará uma série de operações para testar a tabela de símbolos, incluindo:
+O compilador irá:
 
-- Inserção de símbolos em diferentes escopos
-- Busca de símbolos através de escopos aninhados
-- Criação e remoção de escopos
-- Teste de parâmetros de função
+1. Realizar análise léxica e sintática
+2. Construir e exibir a AST
+3. Executar análise semântica
+4. Gerar código MIPS no arquivo `programa.s`
 
-### Executando o Analisador Léxico
+### Exemplo de Programa Goianinha
 
-O analisador léxico pode ser usado para analisar um arquivo fonte da linguagem Goianinha:
+```goianinha
+int x, y, resultado;
 
-```bash
-./lexer/goianinha test_program/arquivo.gyn
+int soma(int a, int b) {
+    retorne a + b;
+}
+
+programa {
+    leia x;
+    leia y;
+    resultado = soma(x, y);
+    escreva resultado;
+    novalinha;
+}
 ```
 
-Onde `arquivo.gyn` é o nome do arquivo que você deseja analisar. O analisador imprimirá uma lista de tokens reconhecidos, incluindo:
+### Código MIPS Gerado
 
-- TOKEN: Tipo do token (ID, INT, PROGRAMA, etc.)
-- LEXEMA: O texto do token no arquivo fonte
-- LINHA: Número da linha onde o token foi encontrado
+O compilador gera código MIPS assembly válido que pode ser executado em simuladores como MARS ou SPIM.
 
-### Verificando Erros
+## Características da Linguagem
 
-O analisador léxico reporta os seguintes tipos de erros:
+- **Tipos de dados**: `int` (inteiro) e `car` (caractere)
+- **Declarações**: Variáveis globais e locais, funções
+- **Comandos**:
+  - `leia` - entrada de dados
+  - `escreva` - saída de dados
+  - `novalinha` - quebra de linha
+  - `se...senao` - condicional
+  - `enquanto` - laço
+  - `retorne` - retorno de função
+- **Expressões**: Aritméticas (+, -, \*, /), relacionais, chamadas de função
+- **Operadores**: +, -, \*, /, ==, !=, <, >, <=, >=, =
 
-- Caracteres inválidos
-- Strings não fechadas
-- Strings com quebras de linha
-- Comentários não fechados
+## Regras Semânticas Implementadas
 
-## Arquivos de Teste
+1. **Escopo**: Funções devem ser declaradas antes do bloco principal
+2. **Tipos**: Verificação de compatibilidade em operações e atribuições
+3. **Declarações**: Variáveis devem ser declaradas antes do uso
+4. **Funções**: Verificação de parâmetros e tipo de retorno
+5. **Comandos**: `retorne` apenas em funções, condicionais com tipos corretos
 
-O diretório `test_program/` contém exemplos para testar o compilador:
+## Status do Projeto
 
-- `fatorialCorreto.gyn`: Um programa correto que calcula o fatorial
-- `fatorialErroLin1ComentarioNtermina.gyn`: Erro de comentário não terminado
-- `fatorialErroLin15String2linhas.gyn`: Erro de string com quebra de linha
-- `expressao1ErroLin4CadeiaNaoTermina.gyn`: Erro de string não terminada
-- `erroLin6Caractereinvalido.gyn`: Erro de caractere inválido
+✅ **COMPLETO** - Todas as 4 fases implementadas e funcionais:
 
-## Limpeza
+- Análise léxica
+- Análise sintática com AST
+- Análise semântica com verificações
+- Geração de código MIPS
 
-Para limpar os arquivos gerados:
-
-```bash
-make clean
-```
+O compilador está pronto para apresentação e uso!
